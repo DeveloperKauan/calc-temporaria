@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Provão Paulista 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F8F8; /* Very light grey, almost white */
+            display: flex;
+            flex-direction: column; /* Arrange items vertically */
+            justify-content: flex-start; /* Start content from the top */
+            align-items: center; /* Center horizontally */
+            min-height: 100vh;
+            padding: 0; /* Remove body padding, use padding on elements */
+            box-sizing: border-box;
+            color: #1A1A1A; /* Dark text for contrast */
+        }
+        .main-header {
+            background-color: #DC2626; /* Red */
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0; /* Increased padding for better visual */
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+            width: 100%;
+            margin-bottom: 2rem; /* Space between header and container */
+            border-bottom-left-radius: 1rem; /* Rounded corners for the bottom of the header */
+            border-bottom-right-radius: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .container {
+            background-color: #FFFFFF;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin: 0 2rem 2rem 2rem; /* Add horizontal margin and bottom margin */
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%234B5563'%3e%3cpath d='M7 7l3-3 3 3m0 6l-3 3-3-3'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em 1.5em;
+        }
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #DC2626; /* Red focus border */
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2); /* Red shadow */
+        }
+        button {
+            width: 100%;
+            padding: 0.85rem 1.5rem;
+            background-color: #DC2626; /* Red button */
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out; /* Added transform transition */
+            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3); /* Red shadow */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        button:hover {
+            background-color: #B91C1C; /* Darker red on hover */
+            box-shadow: 0 6px 15px rgba(220, 38, 38, 0.4);
+            transform: translateY(-2px) scale(1.01); /* Slight lift and scale animation */
+        }
+        button:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none; /* No transform when disabled */
+        }
+        .result-box {
+            background-color: #FEE2E2; /* Light red background */
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #991B1B; /* Dark red text */
+            border: 1px solid #EF4444; /* Red border */
+            display: none;
+            opacity: 0; /* Start hidden for animation */
+            transform: translateY(10px); /* Start slightly below for animation */
+        }
+        .result-box.show {
+            animation: fadeInSlideUp 0.5s ease-out forwards;
+        }
+        @keyframes fadeInSlideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .error-message {
+            color: #DC2626; /* Red error message */
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #FFFFFF;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+        .modal-close-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #4B5563; /* Dark grey for close button */
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .info-section {
+            background-color: #FEE2E2; /* Light red background for info */
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid #EF4444; /* Red border */
+            color: #1A1A1A; /* Dark text */
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .info-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #991B1B; /* Dark red heading */
+            text-align: center;
+        }
+        .info-section p {
+            margin-bottom: 0.75rem;
+        }
+        .info-section strong {
+            color: #991B1B; /* Dark red for strong text */
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        Meu Provão - Calc Temporária 2025
+    </header>
+
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-4">Calculadora Provão Paulista 2025</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="nota1Ano" class="block text-gray-700 text-sm font-medium mb-1">Nota do 1° ano (0-90):</label>
+                <input type="number" id="nota1Ano" min="0" max="90" value="0" class="focus:border-red-500">
+                <p id="errorNota1Ano" class="error-message">A nota do 1° ano deve ser entre 0 e 90.</p>
+            </div>
+            <div>
+                <label for="nota2Ano" class="block text-gray-700 text-sm font-medium mb-1">Nota do 2° ano (0-90):</label>
+                <input type="number" id="nota2Ano" min="0" max="90" value="0" class="focus:border-red-500">
+                <p id="errorNota2Ano" class="error-message">A nota do 2° ano deve ser entre 0 e 90.</p>
+            </div>
+            <div>
+                <label for="acertosL" class="block text-gray-700 text-sm font-medium mb-1">Acertos Linguagens (0-24):</label>
+                <input type="number" id="acertosL" min="0" max="24" value="0" class="focus:border-red-500">
+                <p id="errorAcertosL" class="error-message">Acertos em Linguagens devem ser entre 0 e 24.</p>
+            </div>
+            <div>
+                <label for="acertosM" class="block text-gray-700 text-sm font-medium mb-1">Acertos Matemática (0-18):</label>
+                <input type="number" id="acertosM" min="0" max="18" value="0" class="focus:border-red-500">
+                <p id="errorAcertosM" class="error-message">Acertos em Matemática devem ser entre 0 e 18.</p>
+            </div>
+            <div>
+                <label for="acertosH" class="block text-gray-700 text-sm font-medium mb-1">Acertos Humanas (0-24):</label>
+                <input type="number" id="acertosH" min="0" max="24" value="0" class="focus:border-red-500">
+                <p id="errorAcertosH" class="error-message">Acertos em Humanas devem ser entre 0 e 24.</p>
+            </div>
+            <div>
+                <label for="acertosN" class="block text-gray-700 text-sm font-medium mb-1">Acertos Natureza (0-24):</label>
+                <input type="number" id="acertosN" min="0" max="24" value="0" class="focus:border-red-500">
+                <p id="errorAcertosN" class="error-message">Acertos em Natureza devem ser entre 0 e 24.</p>
+            </div>
+            <div class="md:col-span-2">
+                <label for="notaRedacao" class="block text-gray-700 text-sm font-medium mb-1">Nota da Redação (0-20):</label>
+                <input type="number" id="notaRedacao" min="0" max="20" value="0" class="focus:border-red-500">
+                <p id="errorNotaRedacao" class="error-message">A nota da Redação deve ser entre 0 e 20.</p>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <label for="tipoCurso" class="block text-gray-700 text-sm font-medium mb-1">Tipo de Curso:</label>
+            <select id="tipoCurso" class="focus:border-red-500">
+                <option value="humanas">Humanas e Artes</option>
+                <option value="exatas">Exatas</option>
+                <option value="biologicas">Biológicas e Saúde</option>
+            </select>
+        </div>
+
+        <button id="calcularBtn" class="mt-6">
+            <span id="buttonText">Calcular Nota Final</span>
+            <div id="spinner" class="spinner hidden"></div>
+        </button>
+
+        <div id="resultado" class="result-box mt-6">
+            Sua Nota Final: <span id="notaFinal">0.00</span>
+        </div>
+
+        <div class="info-section mt-8">
+            <h2>Informações sobre os Pesos do Provão Paulista 2025</h2>
+            <p>A nota final do Provão Paulista 2025 é calculada com base nas notas dos anos anteriores e nos acertos da prova, com pesos diferentes para cada área do conhecimento, dependendo do tipo de curso escolhido. A nota da Redação também tem um peso significativo.</p>
+
+            <p><strong>Fórmulas Detalhadas:</strong></p>
+
+            <p><strong>- Cursos de Humanas e Artes</strong><br>
+            <code>(Nota do 1° ano/90) × 15 + (Nota do 2° ano/90) × 25 + {[(Acertos L/24) × 2 + (Acertos M/18) × 1 + (Acertos H/24) × 2 + (Acertos N/24) × 1 + (Nota da Redação/20) × 2]/9} × 40 + (Nota da Redação)</code></p>
+
+            <p><strong>- Cursos de Exatas</strong><br>
+            <code>(Nota do 1° ano/90) × 15 + (Nota do 2° ano/90) × 25 + {[(Acertos L/24) × 1 + (Acertos M/18) × 3 + (Acertos H/24) × 1 + (Acertos N/24) × 2 + (Nota da Redação/20) × 1]/9} × 40 + (Nota da Redação)</code></p>
+
+            <p><strong>- Cursos de Biológicas e Saúde</strong><br>
+            <code>(Nota do 1° ano/90) × 15 + (Nota do 2° ano/90) × 25 + {[(Acertos L/24) × 2 + (Acertos M/18) × 1 + (Acertos H/24) × 1 + (Acertos N/24) × 3 + (Nota da Redação/20) × 1]/9} × 40 + (Nota da Redação)</code></p>
+            <p><em>L = Linguagens, M = Matemática, H = Humanas, N = Natureza.</em></p>
+        </div>
+    </div>
+
+    <!-- Modal para mensagens de erro -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close-button" onclick="closeModal()">&times;</button>
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Erro de Validação</h3>
+            <p id="modalMessage" class="text-gray-700"></p>
+            <button class="mt-6 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600" onclick="closeModal()">Entendi</button>
+        </div>
+    </div>
+
+    <script>
+        // Função para exibir o modal de erro
+        function showModal(message) {
+            const modal = document.getElementById('errorModal');
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.textContent = message;
+            modal.classList.add('show');
+        }
+
+        // Função para fechar o modal de erro
+        function closeModal() {
+            const modal = document.getElementById('errorModal');
+            modal.classList.remove('show');
+        }
+
+        // Função para validar um campo de entrada
+        function validateInput(id, min, max, errorMessage) {
+            const input = document.getElementById(id);
+            const errorElement = document.getElementById(`error${id.charAt(0).toUpperCase() + id.slice(1)}`);
+            const value = parseFloat(input.value);
+
+            if (isNaN(value) || value < min || value > max) {
+                errorElement.style.display = 'block';
+                return false;
+            } else {
+                errorElement.style.display = 'none';
+                return true;
+            }
+        }
+
+        // Adiciona listeners para validação em tempo real
+        document.getElementById('nota1Ano').addEventListener('input', () => validateInput('nota1Ano', 0, 90, 'A nota do 1° ano deve ser entre 0 e 90.'));
+        document.getElementById('nota2Ano').addEventListener('input', () => validateInput('nota2Ano', 0, 90, 'A nota do 2° ano deve ser entre 0 e 90.'));
+        document.getElementById('acertosL').addEventListener('input', () => validateInput('acertosL', 0, 24, 'Acertos em Linguagens devem ser entre 0 e 24.'));
+        document.getElementById('acertosM').addEventListener('input', () => validateInput('acertosM', 0, 18, 'Acertos em Matemática devem ser entre 0 e 18.'));
+        document.getElementById('acertosH').addEventListener('input', () => validateInput('acertosH', 0, 24, 'Acertos em Humanas devem ser entre 0 e 24.'));
+        document.getElementById('acertosN').addEventListener('input', () => validateInput('acertosN', 0, 24, 'Acertos em Natureza devem ser entre 0 e 24.'));
+        document.getElementById('notaRedacao').addEventListener('input', () => validateInput('notaRedacao', 0, 20, 'A nota da Redação deve ser entre 0 e 20.'));
+
+        document.getElementById('calcularBtn').addEventListener('click', () => {
+            const calcularBtn = document.getElementById('calcularBtn');
+            const buttonText = document.getElementById('buttonText');
+            const spinner = document.getElementById('spinner');
+            const resultadoBox = document.getElementById('resultado');
+            const notaFinalSpan = document.getElementById('notaFinal');
+
+            // Esconde o resultado e mostra o spinner
+            resultadoBox.style.display = 'none';
+            resultadoBox.classList.remove('show'); // Remove 'show' class to reset animation
+            buttonText.textContent = 'Calculando...';
+            spinner.classList.remove('hidden');
+            calcularBtn.disabled = true;
+
+            // Simula um pequeno atraso para o spinner ser visível
+            setTimeout(() => {
+                let isValid = true;
+                let errorMessage = '';
+
+                // Valida todos os campos
+                if (!validateInput('nota1Ano', 0, 90, 'A nota do 1° ano deve ser entre 0 e 90.')) isValid = false;
+                if (!validateInput('nota2Ano', 0, 90, 'A nota do 2° ano deve ser entre 0 e 90.')) isValid = false;
+                if (!validateInput('acertosL', 0, 24, 'Acertos em Linguagens devem ser entre 0 e 24.')) isValid = false;
+                if (!validateInput('acertosM', 0, 18, 'Acertos em Matemática devem ser entre 0 e 18.')) isValid = false;
+                if (!validateInput('acertosH', 0, 24, 'Acertos em Humanas devem ser entre 0 e 24.')) isValid = false;
+                if (!validateInput('acertosN', 0, 24, 'Acertos em Natureza devem ser entre 0 e 24.')) isValid = false;
+                if (!validateInput('notaRedacao', 0, 20, 'A nota da Redação deve ser entre 0 e 20.')) isValid = false;
+
+                // Se houver algum erro, exibe o modal e para a execução
+                if (!isValid) {
+                    errorMessage = 'Por favor, corrija os valores inválidos nos campos antes de calcular.';
+                    showModal(errorMessage);
+                    buttonText.textContent = 'Calcular Nota Final';
+                    spinner.classList.add('hidden');
+                    calcularBtn.disabled = false;
+                    return;
+                }
+
+                // Coleta os valores dos inputs
+                const nota1Ano = parseFloat(document.getElementById('nota1Ano').value);
+                const nota2Ano = parseFloat(document.getElementById('nota2Ano').value);
+                const acertosL = parseFloat(document.getElementById('acertosL').value);
+                const acertosM = parseFloat(document.getElementById('acertosM').value);
+                const acertosH = parseFloat(document.getElementById('acertosH').value);
+                const acertosN = parseFloat(document.getElementById('acertosN').value);
+                const notaRedacao = parseFloat(document.getElementById('notaRedacao').value);
+                const tipoCurso = document.getElementById('tipoCurso').value;
+
+                let notaFinal = 0;
+                let examWeightedSum = 0;
+
+                // Parte comum da fórmula
+                const commonPart = (nota1Ano / 90) * 15 + (nota2Ano / 90) * 25;
+
+                // Cálculo da parte da prova de acordo com o tipo de curso
+                switch (tipoCurso) {
+                    case 'humanas':
+                        examWeightedSum = (acertosL / 24) * 2 +
+                                          (acertosM / 18) * 1 +
+                                          (acertosH / 24) * 2 +
+                                          (acertosN / 24) * 1 +
+                                          (notaRedacao / 20) * 2;
+                        break;
+                    case 'exatas':
+                        examWeightedSum = (acertosL / 24) * 1 +
+                                          (acertosM / 18) * 3 +
+                                          (acertosH / 24) * 1 +
+                                          (acertosN / 24) * 2 +
+                                          (notaRedacao / 20) * 1;
+                        break;
+                    case 'biologicas':
+                        examWeightedSum = (acertosL / 24) * 2 +
+                                          (acertosM / 18) * 1 +
+                                          (acertosH / 24) * 1 +
+                                          (acertosN / 24) * 3 +
+                                          (notaRedacao / 20) * 1;
+                        break;
+                }
+
+                // Cálculo da nota final
+                notaFinal = commonPart + (examWeightedSum / 9) * 40 + notaRedacao;
+
+                // Exibe o resultado e adiciona a classe para a animação
+                notaFinalSpan.textContent = notaFinal.toFixed(2); // Formata para 2 casas decimais
+                resultadoBox.style.display = 'block';
+                resultadoBox.classList.add('show');
+
+                // Restaura o botão
+                buttonText.textContent = 'Calcular Nota Final';
+                spinner.classList.add('hidden');
+                calcularBtn.disabled = false;
+            }, 500); // Atraso de 500ms para simular o cálculo
+        });
+
+        // Inicializa a validação de todos os campos ao carregar a página
+        window.onload = () => {
+            validateInput('nota1Ano', 0, 90, '');
+            validateInput('nota2Ano', 0, 90, '');
+            validateInput('acertosL', 0, 24, '');
+            validateInput('acertosM', 0, 18, '');
+            validateInput('acertosH', 0, 24, '');
+            validateInput('acertosN', 0, 24, '');
+            validateInput('notaRedacao', 0, 20, '');
+        };
+    </script>
+</body>
+</html>
